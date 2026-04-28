@@ -3,33 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>I tuoi pazienti</title>
+  <title>WordCare - I tuoi Pazienti</title>
+  
+  <!-- FontAwesome per le icone -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  
+  <!-- Fogli di stile (eredita home.css per Navbar/Footer e usa pazienti.css per lo specifico) -->
+  <link rel="stylesheet" href="/professionista/homeprof/home.css" />
   <link rel="stylesheet" href="/professionista/i tuoi pazienti/pazienti.css" />
+  
+  <script src="/professionista/i tuoi pazienti/pazienti.js"></script>
 </head>
 <body>
-  <div class="welcomeBox">
-    <h1>I tuoi pazienti</h1>
+  <!-- Navbar (Identica alla Home) -->
+  <nav class="navbar">
+    <div class="navbar-brand">WordCare <span style="font-size: 1rem; font-weight: normal; opacity: 0.8;">| Professionista</span></div>
+    <div class="menu-toggle"><span></span><span></span><span></span></div>
+    
+    <ul class="navbar-links">
+      <li><a href="/professionista/home"><i class="fas fa-home"></i> Dashboard</a></li>
+      <li><a href="/professionista/agenda/calendario.html"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+      <li><a href="/professionista/i tuoi pazienti/pazienti.html" style="background: rgba(255,255,255,0.2);"><i class="fas fa-users"></i> Pazienti</a></li>
+    </ul>
+    
+    <div style="display: flex; align-items: center">
+      <div class="navbar-avatar" style="margin-right: 20px" id="avatar-dropdown-trigger">
+        <img src="../../images/avatars/Avatar1.png" alt="Avatar Professionista" />
+        <div class="avatar-dropdown" id="avatar-dropdown-menu">
+          <div class="user-name" id="dropdown-name">Caricamento...</div>
+          <a href="/professionista/il tuo profilo/profilo.html"><i class="fas fa-user-doctor"></i> Il mio profilo</a>
+        </div>
+      </div>
+      <a href="/logout">
+        <button class="Btn">
+          <div class="sign">
+            <svg viewBox="0 0 512 512">
+              <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+            </svg>
+          </div>
+          <div class="text">Logout</div>
+        </button>
+      </a>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <section class="greeting">
+      <h1>I tuoi Pazienti</h1>
+      <p>Gestisci l'anagrafica, aggiungi nuovi pazienti e monitora i loro progressi.</p>
+    </section>
+
+    <!-- Layout a griglia flessibile: Lista a sinistra, Form a destra (su desktop) -->
+    <div class="patients-layout">
+      
+      <!-- Colonna Lista Pazienti -->
+      <div class="patients-list-section">
+        <h2 class="upcoming-title" style="text-align: left; margin-top: 0;">Anagrafica</h2>
+        <div id="lista-pazienti" class="patients-grid">
+          <!-- Le card pazienti verranno inserite qui da pazienti.js -->
+        </div>
+      </div>
+
+      <!-- Colonna Aggiungi Paziente -->
+      <div class="patients-form-section">
+        <div class="card add-patient-card" id="aggiungi-paziente">
+          <div class="card-header">
+            <div class="icon-circle"><i class="fas fa-user-plus"></i></div>
+            <div>
+              <h3>Aggiungi Paziente</h3>
+              <p>Inserisci i dati per la nuova cartella</p>
+            </div>
+          </div>
+          
+          <form id="form-aggiungi-paziente" class="form-group">
+            <div class="input-container">
+              <i class="fas fa-font"></i>
+              <input type="text" id="nome" placeholder="Nome" required />
+            </div>
+            
+            <div class="input-container">
+              <i class="fas fa-font"></i>
+              <input type="text" id="cognome" placeholder="Cognome" required />
+            </div>
+            
+            <div class="input-container">
+              <i class="fas fa-calendar-alt"></i>
+              <input type="date" id="data_nascita" placeholder="Data di nascita" required />
+            </div>
+            
+            <div class="input-container">
+              <i class="fas fa-notes-medical"></i>
+              <input type="text" id="patologia" placeholder="Patologia (Opzionale)" />
+            </div>
+            
+            <button class="btn-submit" type="submit">Crea Cartella Paziente</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modale di Conferma Personalizzato -->
+  <div id="custom-confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3>Conferma Rimozione</h3>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-modal-message">Sei sicuro di voler terminare il percorso di cura?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-modal-cancel" class="btn-cancel">Annulla</button>
+        <button id="btn-modal-confirm" class="btn-confirm">Termina Cura</button>
+      </div>
+    </div>
   </div>
 
-  <div id="lista-pazienti" class="card horizontal">
-    <!-- Verrà riempito dinamicamente da pazienti.js -->
-  </div>
-
-<!-- Card aggiungi paziente -->
-  <div class="card template2" id="aggiungi-paziente">
-  <div class="card_title__container">
-    <div class="card_title">Aggiungi nuovo paziente</div>
-    <div class="card_paragraph">Inserisci tutti i dati richiesti</div>
-  </div>
-  <form id="form-aggiungi-paziente" class="form-group">
-    <input type="text" id="nome" placeholder="Nome" required />
-    <input type="text" id="cognome" placeholder="Cognome" required />
-    <input type="date" id="data_nascita" placeholder="Data di nascita" />
-    <input type="text" id="patologia" placeholder="Patologia" />
-    <button class="button" type="submit">Aggiungi</button>
-  </form>
-</div>
-
-  <script src="/professionista/i tuoi pazienti/pazienti.js"></script>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>WordCare Pro</h3>
+        <p>Strumenti avanzati per il monitoraggio e lo sviluppo linguistico dei tuoi pazienti.</p>
+      </div>
+      <div class="footer-bottom" style="width: 100%;">
+        <p>&copy; 2025 WordCare. Tutti i diritti riservati.</p>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

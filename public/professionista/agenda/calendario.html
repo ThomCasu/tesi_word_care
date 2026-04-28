@@ -12,19 +12,23 @@
   <section id="gestione-impegni">
     <h2>Gestione impegni per il <span id="data-attiva">[nessuna]</span></h2>
 
-    <div>
+        <div>
       <h3>Crea Appuntamento</h3>
       <form id="form-appuntamento">
         <input type="date" name="data" required>
         <input type="time" name="ora" required>
         <input type="text" name="sede" placeholder="Sede" required>
-        <input type="number" name="paziente_id" placeholder="ID Paziente" required>
-        <input type="text" name="nome" placeholder="Nome (facoltativo)">
-        <input type="text" name="cognome" placeholder="Cognome (facoltativo)">
-        <input type="text" name="patologia" placeholder="Patologia (facoltativo)">
+        
+        <!-- Abbiamo sostituito gli input manuali con un comodo menu a tendina -->
+        <select name="paziente_id" id="select-paziente" required>
+          <option value="" disabled selected>Caricamento pazienti...</option>
+        </select>
+        
         <button type="submit">Salva Appuntamento</button>
       </form>
     </div>
+
+    <div>
 
     <div>
       <h3>Crea Promemoria</h3>

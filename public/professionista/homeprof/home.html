@@ -1,61 +1,134 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Professionista</title>
-  <link rel="stylesheet" href="/professionista/homeprof/home.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WordCare - Dashboard Professionista</title>
+    
+    <!-- FontAwesome per le icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
+    <!-- Foglio di stile aggiornato -->
+    <link rel="stylesheet" href="/professionista/homeprof/home.css" />
+    
+    <script src="/professionista/homeprof/home.js"></script>
+  </head>
 
-<body>
-  <!-- Sezione 1 - Contenitore principale -->
-  <div class="card horizontal main-container">
-    <div class="welcomeBox">
-      <span id="welcomeMessage" class="welcomeMessage"></span>
-  </div>
-
-    <!-- Card di Promemoria -->
-    <div class="card template2">
-      <div class="card_title__container">
-        <span class="card_title">Promemoria</span>
-        <p class="card_paragraph">Attività da non dimenticare</p>
+  <body>
+    <!-- Copia esatta della Navbar con link adattati al Professionista -->
+    <nav class="navbar">
+      <div class="navbar-brand">WordCare <span style="font-size: 1rem; font-weight: normal; opacity: 0.8;">| Professionista</span></div>
+      <div class="menu-toggle"><span></span><span></span><span></span></div>
+      
+      <ul class="navbar-links">
+        <li><a href="/professionista/home"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="/professionista/agenda/calendario.html"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+        <li><a href="/professionista/i tuoi pazienti/pazienti.html"><i class="fas fa-users"></i> Pazienti</a></li>
+      </ul>
+      
+      <div style="display: flex; align-items: center">
+        <div class="navbar-avatar" style="margin-right: 20px" id="avatar-dropdown-trigger">
+          <img src="../../images/avatars/Avatar1.png" alt="Avatar Professionista" />
+          <div class="avatar-dropdown" id="avatar-dropdown-menu">
+            <div class="user-name" id="dropdown-name">Caricamento...</div>
+            <a href="/professionista/il tuo profilo/profilo.html"><i class="fas fa-user-doctor"></i> Il mio profilo</a>
+          </div>
+        </div>
+        <a href="/logout">
+          <button class="Btn">
+            <div class="sign">
+              <svg viewBox="0 0 512 512">
+                <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+              </svg>
+            </div>
+            <div class="text">Logout</div>
+          </button>
+        </a>
       </div>
-      <hr class="line" />
-      <ul class="card__list" id="promemoriaList"></ul>
-      <button onclick="location.href='/professionista/agenda/calendario.html'" class="button">Vai alla tua agenda</button>
-    </div>
-    <!-- Card degli Appuntamenti -->
-    <div class="card template2">
-      <div class="card_title__container">
-        <span class="card_title">Appuntamenti</span>
-        <p class="card_paragraph">Prossimi incontri</p>
-      </div>
-      <hr class="line" />
-      <ul class="card__list" id="appuntamentiList"></ul>
-      <button onclick="location.href='/professionista/agenda/calendario.html'" class="button">Vai alla tua agenda</button>
-    </div>
-  </div>
+    </nav>
 
-  <!-- Sezione 2 - Servizi -->
-  <div class="services">
-    <div class="card service-card" onclick="location.href='/professionista/il tuo profilo/profilo.html'">
-      <div class="icon">👤</div>
-      <span class="label">Il tuo profilo</span>
-    </div>
-    <div class="card service-card" onclick="location.href='/professionista/agenda/calendario.html'">
-      <div class="icon">🗓️</div>
-      <span class="label">La tua agenda</span>
-    </div>
-    <div class="card service-card" onclick="location.href='/professionista/i tuoi pazienti/pazienti.html'">
-      <div class="icon">🩺</div>
-      <span class="label">I tuoi pazienti</span>
-    </div>
-    <div class="card service-card" onclick="location.href='/views/DashBoardGiochi/DashBoardGiochi.html'">
-      <div class="icon">🎮</div>
-      <span class="label">I nostri giochi</span>
-    </div>
-  </div>
-  
-  <script src="/professionista/homeprof/home.js"></script>
-</body>
+    <main class="dashboard">
+      <!-- Sezione Saluto -->
+      <section class="greeting">
+        <h1 id="welcomeMessage">Caricamento profilo...</h1>
+        <p>Ecco il riepilogo della tua giornata lavorativa. Buon lavoro!</p>
+      </section>
+
+      <!-- Accesso Rapido (Ex bottoni servizi) -->
+      <h2 class="stats-title">Accesso Rapido</h2>
+      <section class="stats">
+        <div class="stat-card" onclick="location.href='/professionista/il tuo profilo/profilo.html'">
+          <div class="icon"><i class="fas fa-user-doctor"></i></div>
+          <h3>Il tuo profilo</h3>
+          <span style="font-size: 0.9rem; font-weight: normal; color: var(--subtext);">Gestisci dati</span>
+        </div>
+        <div class="stat-card" onclick="location.href='/professionista/agenda/calendario.html'">
+          <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+          <h3>La tua agenda</h3>
+          <span style="font-size: 0.9rem; font-weight: normal; color: var(--subtext);">Organizza visite</span>
+        </div>
+        <div class="stat-card" onclick="location.href='/professionista/i tuoi pazienti/pazienti.html'">
+          <div class="icon"><i class="fas fa-users"></i></div>
+          <h3>I tuoi pazienti</h3>
+          <span style="font-size: 0.9rem; font-weight: normal; color: var(--subtext);">Monitora progressi</span>
+        </div>
+        <div class="stat-card" onclick="location.href='/views/DashBoardGiochi/DashBoardGiochi.html'">
+          <div class="icon"><i class="fas fa-gamepad"></i></div>
+          <h3>I nostri giochi</h3>
+          <span style="font-size: 0.9rem; font-weight: normal; color: var(--subtext);">Catalogo esercizi</span>
+        </div>
+      </section>
+
+      <!-- Sezione divisa a metà per Appuntamenti e Promemoria -->
+      <div class="dashboard-split">
+        <!-- Colonna Appuntamenti -->
+        <div class="split-column">
+          <h2 class="upcoming-title">Prossimi Appuntamenti</h2>
+          <div id="appuntamentiList" class="appointments-container">
+            <!-- Popolato via JS -->
+          </div>
+          <div class="appointments-footer" style="margin-top: -10px;">
+            <button class="btn-view-all" onclick="location.href='/professionista/agenda/calendario.html'">
+              <i class="fas fa-calendar"></i>
+              <span>Vai all'Agenda completa</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Colonna Promemoria -->
+        <div class="split-column">
+          <h2 class="upcoming-title">Promemoria Attivi</h2>
+          <div id="promemoriaList" class="appointments-container">
+             <!-- Popolato via JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Standard -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>WordCare Pro</h3>
+          <p>Strumenti avanzati per il monitoraggio e lo sviluppo linguistico dei tuoi pazienti.</p>
+        </div>
+        <div class="footer-section">
+          <h3>Collegamenti Rapidi</h3>
+          <ul>
+            <li><a href="/professionista/home">Dashboard</a></li>
+            <li><a href="/professionista/i tuoi pazienti/pazienti.html">Lista Pazienti</a></li>
+            <li><a href="/professionista/agenda/calendario.html">Agenda</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Assistenza Tecnica</h3>
+          <p><i class="fas fa-envelope"></i> supporto.pro@wordcare.it</p>
+          <p><i class="fas fa-phone"></i> +39 02 1234567</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 WordCare. Tutti i diritti riservati.</p>
+      </div>
+    </footer>
+  </body>
 </html>

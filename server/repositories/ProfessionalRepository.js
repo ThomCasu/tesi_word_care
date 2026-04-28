@@ -6,44 +6,49 @@ const { db } = require('../database/Database');
 const Profesional = require('../models/Professionista');
 
 class ProfessionalRepository {
-    async getProfiloCompleto(userId) {
-      const query = `
-        SELECT u.id AS id, p.nome, p.cognome, p.data_nascita, p.specializzazione, p.sede
-        FROM User u
-        JOIN Professionista p ON u.id = p.user_id
-        WHERE u.id = ?
-      `;
+  async getProfiloCompleto(userId) {
+    const query = `
+      SELECT u.id AS id, p.nome, p.cognome, p.data_nascita, p.specializzazione, p.sede
+      FROM User u
+      JOIN Professionista p ON u.id = p.user_id
+      WHERE u.id = ?
+    `;
 
-      return new Promise((resolve, reject) => {
-        db.get(query, [userId], (err, row) => {
-          if (err) return reject(err);
-          resolve(row);
-        });
-      });
-    }
-
-
-
-    async salvaProfilo(userId, dati) {
     return new Promise((resolve, reject) => {
-      db.run(
-        `UPDATE User SET nome = ?, cognome = ? WHERE id = ?`,
-        [dati.nome, dati.cognome, userId],
-        function (err) {
-          if (err) return reject(err);
-          db.run(
-            `UPDATE Professionista SET data_nascita = ?, specializzazione = ?, sede = ? WHERE user_id = ?`,
-            [dati.data_nascita, dati.specializzazione, dati.sede, userId],
-            function (err2) {
-              if (err2) return reject(err2);
-              resolve(true);
-            }
-          );
-        }
-      );
+      db.get(query, [userId], (err, row) => {
+        if (err) return reject(err);
+        resolve(row);
+      });
     });
   }
 
+  // --- METODO CORRETTO ---
+  async salvaProfilo(userId, dati) {
+    return new Promise((resolve, reject) => {
+      // Aggiorniamo SOLO la tabella Professionista, perché è lì che stanno nome e cognome!
+      const sql = `
+        UPDATE Professionista 
+        SET nome = ?, cognome = ?, data_nascita = ?, specializzazione = ?, sede = ?
+        WHERE user_id = ?
+      `;
+      const params = [
+        dati.nome, 
+        dati.cognome, 
+        dati.data_nascita, 
+        dati.specializzazione, 
+        dati.sede, 
+        userId // req.session.userId dal controller
+      ];
+
+      db.run(sql, params, function (err) {
+        if (err) {
+          console.error("❌ Errore SQL in salvaProfilo:", err.message);
+          return reject(err);
+        }
+        resolve(true);
+      });
+    });
+  }
 
   async getPazientiInCura(professionalId) {
     const query = `
@@ -61,50 +66,96 @@ class ProfessionalRepository {
   }
 
   async aggiungiPaziente({ nome, cognome, data_nascita, patologia }, professionalId) {
-  return new Promise((resolve, reject) => {
-    const timestamp = Date.now();
-    const email = `paziente${timestamp}@demo.com`;
-    const username = `paziente${timestamp}`;
-    const password = 'demo123';
-    const behavior = 'patient';
+    return new Promise((resolve, reject) => {
+      // 1. Controlla se il paziente esiste già nel database (ignorando maiuscole/minuscole)
+      const checkPazienteSql = `SELECT id FROM Paziente WHERE LOWER(nome) = LOWER(?) AND LOWER(cognome) = LOWER(?) AND data_nascita = ?`;
 
-    // 1. Crea nuovo utente
-    db.run(
-      `INSERT INTO User (email, username, password, behavior) VALUES (?, ?, ?, ?)`,
-      [email, username, password, behavior],
-      function (err) {
+      db.get(checkPazienteSql, [nome, cognome, data_nascita], (err, pazienteRow) => {
         if (err) return reject(err);
 
-        const user_id = this.lastID;
-  console.log("⚙️ step 1 (user) ok");
-        // 2. Crea paziente
-        db.run(
-          `INSERT INTO Paziente (user_id, nome, cognome, data_nascita, patologia) VALUES (?, ?, ?, ?, ?)`,
-          [user_id, nome, cognome, data_nascita, patologia],
-          function (err2) {
-            if (err2) return reject(err2);
+        if (pazienteRow) {
+          // Il paziente esiste. Controlliamo se è già in cura con questo professionista
+          const paziente_id = pazienteRow.id;
+          const checkInCuraSql = `SELECT * FROM InCura WHERE paziente = ? AND professionista = ?`;
 
-            const paziente_id = this.lastID;
-            const oggi = new Date().toISOString().split('T')[0];
-  console.log("⚙️ step 2 (paziente) ok");            
-            // 3. Inserisce relazione in cura
-            db.run(
-              `INSERT INTO InCura (paziente, professionista, data_inizio) VALUES (?, ?, ?)`,
-              [paziente_id, professionalId, oggi],
-              function (err3) {
-                if (err3) return reject(err3);
-                resolve(true);
-    console.log("⚙️ step 3 (InCura) ok");
-              }
-            );
-          }
-        );
-      }
-    );
-  });
-}
+          db.get(checkInCuraSql, [paziente_id, professionalId], (err, inCuraRow) => {
+            if (err) return reject(err);
 
+            if (inCuraRow) {
+              // ❌ Già in cura! Rifiutiamo la promessa con un errore personalizzato
+              return reject(new Error("PAZIENTE_GIA_PRESENTE"));
+            } else {
+              // ⚠️ Esiste nel DB ma non è in cura con questo professionista. Aggiungiamo solo la relazione.
+              const oggi = new Date().toISOString().split('T')[0];
+              db.run(
+                `INSERT INTO InCura (paziente, professionista, data_inizio) VALUES (?, ?, ?)`,
+                [paziente_id, professionalId, oggi],
+                function (err) {
+                  if (err) return reject(err);
+                  console.log("⚙️ Paziente esistente collegato in InCura con successo");
+                  resolve(true);
+                }
+              );
+            }
+          });
+        } else {
+          // 2. Il paziente non esiste, procediamo con la creazione completa
+          const timestamp = Date.now();
+          const email = `paziente${timestamp}@demo.com`;
+          const username = `paziente${timestamp}`;
+          const password = 'demo123';
+          const behavior = 'patient';
 
+          // Step A: Crea User
+          db.run(
+            `INSERT INTO User (email, username, password, behavior) VALUES (?, ?, ?, ?)`,
+            [email, username, password, behavior],
+            function (err) {
+              if (err) return reject(err);
+              const user_id = this.lastID;
+
+              // Step B: Crea Paziente
+              db.run(
+                `INSERT INTO Paziente (user_id, nome, cognome, data_nascita, patologia) VALUES (?, ?, ?, ?, ?)`,
+                [user_id, nome, cognome, data_nascita, patologia],
+                function (err2) {
+                  if (err2) return reject(err2);
+                  const paziente_id = this.lastID;
+                  const oggi = new Date().toISOString().split('T')[0];
+
+                  // Step C: Crea Relazione InCura
+                  db.run(
+                    `INSERT INTO InCura (paziente, professionista, data_inizio) VALUES (?, ?, ?)`,
+                    [paziente_id, professionalId, oggi],
+                    function (err3) {
+                      if (err3) return reject(err3);
+                      console.log("⚙️ Nuovo paziente e relazione InCura creati con successo");
+                      resolve(true);
+                    }
+                  );
+                }
+              );
+            }
+          );
+        }
+      });
+    });
+  }
+
+  // --- NUOVO: Rimuove la relazione in InCura tra Paziente e Professionista ---
+  async rimuoviPaziente(pazienteId, professionalId) {
+    const query = `DELETE FROM InCura WHERE paziente = ? AND professionista = ?`;
+    
+    return new Promise((resolve, reject) => {
+      db.run(query, [pazienteId, professionalId], function (err) {
+        if (err) {
+          console.error("❌ Errore SQL in rimuoviPaziente:", err.message);
+          return reject(err);
+        }
+        resolve(true);
+      });
+    });
+  }
 
   async getListaGiochi() {
     return new Promise((resolve, reject) => {
@@ -128,18 +179,18 @@ class ProfessionalRepository {
   }
 
   async getPromemoria(professionalId) {
-  const query = `
-    SELECT pr.*
-    FROM Promemoria pr
-    JOIN PostIt pi ON pi.promemoria = pr.id
-    WHERE pi.professionista = ?`;
-  return new Promise((resolve, reject) => {
-    db.all(query, [professionalId], (err, rows) => {
-      if (err) return reject(err);
-      resolve(rows);
+    const query = `
+      SELECT pr.*
+      FROM Promemoria pr
+      JOIN PostIt pi ON pi.promemoria = pr.id
+      WHERE pi.professionista = ?`;
+    return new Promise((resolve, reject) => {
+      db.all(query, [professionalId], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
     });
-  });
-}
+  }
 
   async creaPromemoria({ data, ora_notifica, nota, professionalId }) {
     return new Promise((resolve, reject) => {

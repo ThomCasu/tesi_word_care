@@ -2,28 +2,157 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>Il tuo profilo</title>
-  <link href="/professionista/il tuo profilo/profilo.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WordCare - Il tuo Profilo</title>
+  
+  <!-- FontAwesome per le icone -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  
+  <!-- Fogli di stile -->
+  <link rel="stylesheet" href="/professionista/homeprof/home.css" />
+  <link rel="stylesheet" href="/professionista/il tuo profilo/profilo.css" />
+  
+  <script src="/professionista/il tuo profilo/profilo.js"></script>
 </head>
 <body>
-  <div class="card">
-    <div class="head">Carta d'identità professionista</div>
-    <div class="content profile">
-    <div class="avatar">
-      <img src="avatarM2.png" alt="Avatar">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">WordCare <span style="font-size: 1rem; font-weight: normal; opacity: 0.8;">| Professionista</span></div>
+    <div class="menu-toggle"><span></span><span></span><span></span></div>
+    
+    <ul class="navbar-links">
+      <li><a href="/professionista/home"><i class="fas fa-home"></i> Dashboard</a></li>
+      <li><a href="/professionista/agenda/calendario.html"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+      <li><a href="/professionista/i tuoi pazienti/pazienti.html"><i class="fas fa-users"></i> Pazienti</a></li>
+    </ul>
+    
+    <div style="display: flex; align-items: center">
+      <div class="navbar-avatar" style="margin-right: 20px" id="avatar-dropdown-trigger">
+        <!-- IMMAGINE NAVBAR CORRETTA -->
+        <img src="avatarM2.jpg" alt="Avatar Professionista" />
+        <div class="avatar-dropdown" id="avatar-dropdown-menu">
+          <div class="user-name" id="dropdown-name">Caricamento...</div>
+          <a href="/professionista/il tuo profilo/profilo.html" style="background: #f0f0f0;"><i class="fas fa-user-doctor"></i> Il mio profilo</a>
+        </div>
+      </div>
+      <a href="/logout">
+        <button class="Btn">
+          <div class="sign">
+            <svg viewBox="0 0 512 512">
+              <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+            </svg>
+          </div>
+          <div class="text">Logout</div>
+        </button>
+      </a>
     </div>
-      <div class="info">
-        <label>ID utente: <input type="text" id="user_id" disabled /></label><br>
-        <label>Nome: <input type="text" id="nome" disabled /></label><br>
-        <label>Cognome: <input type="text" id="cognome" disabled /></label><br>
-        <label>Data di nascita: <input type="date" id="data_nascita" /></label><br>
-        <label>Sede: <input type="text" id="sede" /></label><br>
-        <label>Specializzazione: <input type="text" id="specializzazione" /></label><br>
-        <button class="button" id="salvaBtn">Salva modifiche</button>
-        <p id="esito" style="font-weight:bold; margin-top: 10px;"></p>
+  </nav>
+
+  <main class="dashboard">
+    <section class="greeting">
+      <h1>Il tuo Profilo</h1>
+      <p>Gestisci i tuoi dati personali, la tua specializzazione e le sedi di lavoro.</p>
+    </section>
+
+    <!-- Card Profilo Principale -->
+    <div class="profile-card">
+      <div class="profile-header-banner">
+        <h2><i class="fas fa-id-card-clip"></i> Carta d'Identità Professionista</h2>
+      </div>
+      
+      <div class="profile-content">
+        <!-- Colonna Avatar -->
+        <div class="profile-avatar-section">
+          <div class="avatar-container">
+            <!-- IMMAGINE PROFILO CORRETTA -->
+            <img src="avatarM2.png" alt="Avatar Medico" onerror="this.src='https://via.placeholder.com/150?text=Avatar'">
+            <div class="avatar-overlay">
+              <i class="fas fa-camera"></i>
+            </div>
+          </div>
+          <h3 id="display-name">Caricamento...</h3>
+          <p id="display-spec" class="spec-label">Professionista WordCare</p>
+        </div>
+
+        <!-- Colonna Form Dati -->
+        <div class="profile-form-section">
+          <form id="form-profilo" class="form-grid">
+            
+            <div class="form-group disabled-group">
+              <label>ID Utente di Sistema</label>
+              <div class="input-container">
+                <i class="fas fa-fingerprint"></i>
+                <input type="text" id="user_id" disabled />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group disabled-group">
+                <label>Nome</label>
+                <div class="input-container">
+                  <i class="fas fa-user"></i>
+                  <input type="text" id="nome" disabled />
+                </div>
+              </div>
+              <div class="form-group disabled-group">
+                <label>Cognome</label>
+                <div class="input-container">
+                  <i class="fas fa-user"></i>
+                  <input type="text" id="cognome" disabled />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Data di Nascita</label>
+              <div class="input-container">
+                <i class="fas fa-calendar-alt"></i>
+                <input type="date" id="data_nascita" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Sede Operativa</label>
+              <div class="input-container">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="sede" placeholder="es. Studio Medico Milano" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Specializzazione</label>
+              <div class="input-container">
+                <i class="fas fa-stethoscope"></i>
+                <input type="text" id="specializzazione" placeholder="es. Logopedista Infantile" required />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-submit" type="submit">
+                <i class="fas fa-save"></i> Salva Modifiche
+              </button>
+              <div id="esito" class="esito-message"></div>
+            </div>
+
+          </form>
+        </div>
       </div>
     </div>
-  </div>
-  <script src="/professionista/il tuo profilo/profilo.js"></script>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>WordCare Pro</h3>
+        <p>Strumenti avanzati per il monitoraggio e lo sviluppo linguistico dei tuoi pazienti.</p>
+      </div>
+      <div class="footer-bottom" style="width: 100%;">
+        <p>&copy; 2025 WordCare. Tutti i diritti riservati.</p>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>
+
+avatar.jpg

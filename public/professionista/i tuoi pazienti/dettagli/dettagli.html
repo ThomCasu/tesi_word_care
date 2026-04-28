@@ -3,100 +3,186 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dettagli Paziente</title>
-  <link rel="stylesheet" href="/professionista/i tuoi pazienti/dettagli/dettagli.css">
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script defer src="/professionista/i tuoi pazienti/dettagli/dettagli.js"></script>
+  <title>WordCare - Dettagli Paziente</title>
+  
+  <!-- FontAwesome per le icone -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  
+  <!-- Fogli di stile -->
+  <link rel="stylesheet" href="/professionista/homeprof/home.css" />
+  <link rel="stylesheet" href="/professionista/i tuoi pazienti/dettagli/dettagli.css" />
+  
+  <!-- Chart.js CDN (Sostituisce Google Charts) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="/professionista/i tuoi pazienti/dettagli/dettagli.js"></script>
 </head>
 <body>
-  <div class="card horizontal" style="font-size: 1.1rem; justify-content: space-between;">
-    <div class="card_title__container" style="width: 100%; display: flex; flex-direction: column; gap: 0.5rem;">
-      <!-- Contenuto dinamico da dettagli.js -->
-    </div>
-  </div>
 
-  <div style="display: flex; flex-direction: column; gap: 2rem; max-width: 1100px; width: 100%;">
-    <!-- Esercizi Assegnati -->
-    <div class="card template2">
-      <div class="card_title__container">
-        <div class="card_title">Esercizi Assegnati</div>
-        <hr class="line">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">WordCare <span style="font-size: 1rem; font-weight: normal; opacity: 0.8;">| Professionista</span></div>
+    <div class="menu-toggle"><span></span><span></span><span></span></div>
+    
+    <ul class="navbar-links">
+      <li><a href="/professionista/home"><i class="fas fa-home"></i> Dashboard</a></li>
+      <li><a href="/professionista/agenda/calendario.html"><i class="fas fa-calendar-alt"></i> Agenda</a></li>
+      <li><a href="/professionista/i tuoi pazienti/pazienti.html" style="background: rgba(255,255,255,0.2);"><i class="fas fa-users"></i> Pazienti</a></li>
+    </ul>
+    
+    <div style="display: flex; align-items: center">
+      <div class="navbar-avatar" style="margin-right: 20px" id="avatar-dropdown-trigger">
+        <img src="/professionista/il tuo profilo/avatarM2.jpg" alt="Avatar Professionista" onerror="this.src='https://via.placeholder.com/150?text=Avatar'" />
+        <div class="avatar-dropdown" id="avatar-dropdown-menu">
+          <div class="user-name" id="dropdown-name">Caricamento...</div>
+          <a href="/professionista/il tuo profilo/profilo.html"><i class="fas fa-user-doctor"></i> Il mio profilo</a>
+        </div>
       </div>
-      <table style="width: 100%; color: var(--white); font-size: 0.95rem; border-spacing: 0.5rem 0.3rem;">
-        <thead>
-          <tr style="text-align: left; color: var(--paragraph);">
-            <th></th>
-            <th>Gioco</th>
-            <th>Scadenza</th>
-            <th>Svolti/Assegnati</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <a href="/logout">
+        <button class="Btn">
+          <div class="sign">
+            <svg viewBox="0 0 512 512"><path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path></svg>
+          </div>
+          <div class="text">Logout</div>
+        </button>
+      </a>
     </div>
+  </nav>
 
-<!-- Link alla Dashboard dei Giochi -->
-<div class="card template2">
-  <div class="card_title__container">
-    <div class="card_title">🎮 Prova i giochi</div>
-    <hr class="line">
-    <button class="button" onclick="location.href='/views/DashBoardGiochi/DashBoardGiochi.html'">
-      Vai alla Dashboard dei Giochi
+  <main class="dashboard">
+    
+    <!-- Pulsante Indietro -->
+    <button class="back-btn" onclick="history.back()">
+      <i class="fas fa-arrow-left"></i> Torna alla lista pazienti
     </button>
-  </div>
-</div>
 
-    <!-- Assegna Nuovo Esercizio -->
-    <div class="card template2">
-      <div class="card_title__container">
-        <div class="card_title">Assegna Nuovo Esercizio</div>
-        <hr class="line">
-      </div>
-      <form>
-        <label>Gioco:</label>
-        <select class="custom-select">
-          <option>Collega le immagini</option>
-          <option>Completa la frase</option>
-          <option>Alla ricerca delle sillabe</option>
-          <option>B o P?</option>
-          <option>Memory</option>
-          <option>Leggi e ripeti</option>
-        </select>
-        <br><br>
-        <label>Ripetizioni:</label>
-        <select class="custom-select">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5</option>
-          <option>6</option>
-        </select>
-        <br><br>
-        <label>Scadenza:</label>
-        <input type="date" class="custom-select">
-        <br><br>
-        <button class="button" type="submit">Assegna</button>
-      </form>
+    <!-- Header Paziente (Popolato via JS) -->
+    <div id="patient-header-container" class="patient-header-card">
+      <div style="text-align:center; padding: 2rem; color: var(--subtext);">Caricamento dati paziente...</div>
     </div>
 
-    <!-- Grafico Esercizi -->
-    <div class="card template2">
-      <div class="card_title__container">
-        <div class="card_title">Esercizi settimanali (Esempio senza dati)</div>
-        <hr class="line">
+    <!-- Layout a Griglia per i dettagli -->
+    <div class="details-layout">
+      
+      <!-- Colonna Sinistra (Tabelle e Form) -->
+      <div class="details-main-col">
+        
+        <!-- Esercizi Assegnati -->
+        <div class="detail-card">
+          <div class="card-header-simple">
+            <h3><i class="fas fa-tasks"></i> Esercizi Assegnati</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Stato</th>
+                  <th>Gioco</th>
+                  <th>Scadenza</th>
+                  <th>Svolti</th>
+                </tr>
+              </thead>
+              <tbody id="esercizi-tbody">
+                <!-- Inserito da JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Form Assegna Nuovo Esercizio -->
+        <div class="detail-card">
+          <div class="card-header-simple">
+            <h3><i class="fas fa-plus-circle"></i> Assegna Nuovo Esercizio</h3>
+          </div>
+          <form id="form-assegna-esercizio" class="assign-form">
+            
+            <div class="form-row">
+              <div class="input-container full-width">
+                <i class="fas fa-gamepad"></i>
+                <select class="custom-select" required>
+                  <option value="" disabled selected>Seleziona un gioco...</option>
+                  <option>Collega le immagini</option>
+                  <option>Completa la frase</option>
+                  <option>Alla ricerca delle sillabe</option>
+                  <option>B o P?</option>
+                  <option>Memory</option>
+                  <option>Leggi e ripeti</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row split-row">
+              <div class="input-container">
+                <i class="fas fa-redo"></i>
+                <select class="custom-select" required>
+                  <option value="" disabled selected>Ripetizioni...</option>
+                  <option>1</option><option>2</option><option>3</option>
+                  <option>4</option><option>5</option><option>6</option>
+                </select>
+              </div>
+              <div class="input-container">
+                <i class="fas fa-calendar-times"></i>
+                <input type="date" class="custom-input" required title="Scadenza">
+              </div>
+            </div>
+
+            <button class="btn-submit" type="submit">Assegna al paziente</button>
+          </form>
+        </div>
+
       </div>
-      <div id="graficoEsercizi" style="width: 100%; height: 300px;"></div>
+
+      <!-- Colonna Destra (Grafici e Link) -->
+      <div class="details-side-col">
+        
+        <!-- Link Rapido Dashboard Giochi -->
+        <div class="detail-card highlight-card" onclick="location.href='/views/DashBoardGiochi/DashBoardGiochi.html'">
+          <div class="highlight-content">
+            <div class="highlight-icon"><i class="fas fa-gamepad"></i></div>
+            <div class="highlight-text">
+              <h3>Prova i Giochi</h3>
+              <p>Esplora il catalogo degli esercizi interattivi</p>
+            </div>
+            <i class="fas fa-chevron-right arrow-icon"></i>
+          </div>
+        </div>
+
+        <!-- Grafico Esercizi (Modificato per ospitare il Canvas di Chart.js) -->
+        <div class="detail-card">
+          <div class="card-header-simple">
+            <h3><i class="fas fa-chart-bar"></i> Esercizi Settimanali</h3>
+          </div>
+          <div class="chart-container">
+             <canvas id="canvasEsercizi"></canvas>
+          </div>
+        </div>
+
+        <!-- Grafico Media (Modificato per ospitare il Canvas di Chart.js) -->
+        <div class="detail-card">
+          <div class="card-header-simple">
+            <h3><i class="fas fa-chart-line"></i> Andamento (Ultime 6 sett.)</h3>
+          </div>
+          <div class="chart-container">
+             <canvas id="canvasMedia"></canvas>
+          </div>
+        </div>
+
+      </div>
     </div>
 
-    <!-- Grafico Media -->
-    <div class="card template2">
-      <div class="card_title__container">
-        <div class="card_title">Media ultime 6 settimane (Esempio senza dati)</div>
-        <hr class="line">
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>WordCare Pro</h3>
+        <p>Strumenti avanzati per il monitoraggio e lo sviluppo linguistico dei tuoi pazienti.</p>
       </div>
-      <div id="graficoMedia" style="width: 100%; height: 300px;"></div>
+      <div class="footer-bottom" style="width: 100%;">
+        <p>&copy; 2025 WordCare. Tutti i diritti riservati.</p>
+      </div>
     </div>
-  </div>
+  </footer>
+
 </body>
 </html>

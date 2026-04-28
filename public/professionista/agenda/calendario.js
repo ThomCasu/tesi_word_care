@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   generaCalendario(anno, mese);
+  await caricaPazienti(); // Carica la lista dei pazienti nella tendina
   await caricaEventi(); // Attendi il caricamento
   apriModal(oggiISO);   // Seleziona oggi come giorno attivo
 
@@ -43,6 +44,33 @@ function generaCalendario(anno, mese) {
   }
 }
 
+async function caricaPazienti() {
+  try {
+    const res = await fetch("/professionista/pazienti");
+    if (!res.ok) throw new Error("Errore fetch pazienti");
+    const pazienti = await res.json();
+    
+    const select = document.getElementById("select-paziente");
+    if (!select) return;
+    
+    // Resettiamo la tendina con il placeholder di default
+    select.innerHTML = '<option value="" disabled selected>Seleziona un paziente</option>';
+    
+    pazienti.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id; // L'ID vero che invieremo al database
+      opt.textContent = `${p.nome} ${p.cognome}`; // Il testo che vede il medico
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Errore nel caricamento dei pazienti:", err);
+    const select = document.getElementById("select-paziente");
+    if (select) {
+      select.innerHTML = '<option value="" disabled selected>Errore caricamento pazienti</option>';
+    }
+  }
+}
+
 async function caricaEventi() {
   let [apps, proms] = await Promise.all([
     fetch("/professionista/agenda").then(r => r.json()),
@@ -50,19 +78,11 @@ async function caricaEventi() {
   ]);
 
   if (!apps || apps.length === 0) {
-    apps = [
-      { id: "demo1", data: "2025-06-04", ora: "10:00", paziente_nome: "Marco", paziente_cognome: "Verdi" },
-      { id: "demo2", data: "2025-06-05", ora: "14:00", paziente_nome: "Sara", paziente_cognome: "Rossi" },
-      { id: "demo3", data: "2025-06-06", ora: "16:30", paziente_nome: "Luca", paziente_cognome: "Bianchi" }
-    ];
+    apps = []; // Rimosso mock data per farti vedere quelli reali dal DB
   }
 
   if (!proms || proms.length === 0) {
-    proms = [
-      { id: "demo4", data: "2025-06-05", ora_notifica: "09:00", nota: "Controllare referti paziente Rossi" },
-      { id: "demo5", data: "2025-06-06", ora_notifica: "11:30", nota: "Inviare report alla logopedista" },
-      { id: "demo6", data: "2025-06-07", ora_notifica: "15:00", nota: "Telefonata di follow-up a Bianchi" }
-    ];
+    proms = [];
   }
 
   apps.forEach(app => {
@@ -112,7 +132,8 @@ function eliminaEvento(id, isAppuntamento) {
   fetch(url, { method: "POST" }).then(r => r.ok && location.reload());
 }
 
-function creaAppuntamento(e) {
+// --- FUNZIONE AGGIORNATA CON GESTIONE ERRORI AVANZATA ---
+async function creaAppuntamento(e) {
   e.preventDefault();
   const form = new FormData(e.target);
   const dati = {
@@ -127,23 +148,39 @@ function creaAppuntamento(e) {
     return;
   }
 
-  console.log("📤 Invio appuntamento:", dati);
+  try {
+    const res = await fetch("/professionista/agenda", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dati)
+    });
 
-  fetch("/professionista/agenda", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(dati)
-  }).then(res => {
     if (res.ok) {
       alert("✅ Appuntamento salvato!");
       location.reload();
     } else {
-      alert("❌ Errore nel salvataggio.");
+      // Leggiamo l'errore personalizzato dal server
+      const errorData = await res.json();
+      
+      if (errorData.code === 'PAZIENTE_NON_VALIDO') {
+        // Mostriamo un pop-up interattivo con possibilità di reindirizzamento
+        const goToPatients = confirm(`⚠️ ${errorData.message}\n\nVuoi andare alla tua Home / Lista Pazienti per verificare l'ID corretto o aggiungere il paziente?`);
+        
+        if (goToPatients) {
+          // Reindirizzamento alla rotta dove vedi i pazienti (modifica l'URL se necessario)
+          window.location.href = "/professionista/home"; 
+        }
+      } else {
+        alert("❌ Errore: " + (errorData.error || "Errore sconosciuto nel salvataggio."));
+      }
     }
-  });
+  } catch (err) {
+    console.error("Errore di rete:", err);
+    alert("❌ Impossibile comunicare con il server.");
+  }
 }
 
-function creaPromemoria(e) {
+async function creaPromemoria(e) {
   e.preventDefault();
   const dati = Object.fromEntries(new FormData(e.target).entries());
 
@@ -152,18 +189,16 @@ function creaPromemoria(e) {
     return;
   }
 
-  console.log("📤 Invio promemoria:", dati);
-
-  fetch("/professionista/promemoria", {
+  const res = await fetch("/professionista/promemoria", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(dati)
-  }).then(res => {
-    if (res.ok) {
-      alert("✅ Promemoria salvato!");
-      location.reload();
-    } else {
-      alert("❌ Errore nel salvataggio.");
-    }
   });
+
+  if (res.ok) {
+    alert("✅ Promemoria salvato!");
+    location.reload();
+  } else {
+    alert("❌ Errore nel salvataggio del promemoria.");
+  }
 }

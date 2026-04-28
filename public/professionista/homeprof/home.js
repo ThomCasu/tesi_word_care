@@ -1,19 +1,38 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Messaggio di benvenuto
+  
+  // Gestione menu Avatar
+  const avatarTrigger = document.getElementById("avatar-dropdown-trigger");
+  const avatarMenu = document.getElementById("avatar-dropdown-menu");
+  
+  avatarTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      avatarMenu.classList.toggle("active");
+  });
+
+  document.addEventListener("click", () => {
+      if(avatarMenu.classList.contains("active")) {
+          avatarMenu.classList.remove("active");
+      }
+  });
+
+  // 1. Messaggio di benvenuto e info Profilo
   fetch("/professionista/profilo")
     .then(res => res.json())
     .then(data => {
       console.log("✅ Dati ricevuti:", data);
       const welcome = document.getElementById("welcomeMessage");
-      if (welcome) {
+      const dropdownName = document.getElementById("dropdown-name");
+      
+      if (welcome && data.cognome) {
         welcome.textContent = `Bentornato, Dr. ${data.cognome} ${data.nome}`;
+        dropdownName.textContent = `Dr. ${data.cognome}`;
       }
     })
     .catch(err => {
       console.error("❌ Errore nel caricamento del profilo:", err);
     });
 
-  // Appuntamenti
+  // 2. Appuntamenti
   fetch("/professionista/agenda")
     .then(res => res.json())
     .then(data => {
@@ -21,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const weekAhead = new Date();
       weekAhead.setDate(today.getDate() + 7);
 
-      // Aggiunta dati demo per la presentazione
+      // Dati demo per la presentazione
       if (!data || data.length === 0) {
         data = [
           { data: "2025-06-04", ora: "10:00", paziente_nome: "Marco", paziente_cognome: "Verdi" },
@@ -35,16 +54,38 @@ document.addEventListener("DOMContentLoaded", () => {
         return appDate >= today && appDate <= weekAhead;
       }).slice(0, 3);
 
-      const list = document.getElementById("appuntamentiList");
+      const listContainer = document.getElementById("appuntamentiList");
+      listContainer.innerHTML = ""; // Pulisce loading state
+
+      if(filtered.length === 0) {
+          listContainer.innerHTML = `<p style="text-align:center; color: var(--subtext)">Nessun appuntamento imminente.</p>`;
+          return;
+      }
+
       filtered.forEach(app => {
-        const li = document.createElement("li");
-        li.className = "card__list_item";
-        li.innerHTML = `<span>•</span> ${app.data} - ${app.ora} (${app.paziente_nome} ${app.paziente_cognome})`;
-        list.appendChild(li);
+        const dataObj = new Date(app.data);
+        const mese = dataObj.toLocaleString('it-IT', { month: 'short' });
+        const giorno = String(dataObj.getDate()).padStart(2, '0');
+
+        // Creazione HTML della Card stile Paziente
+        listContainer.innerHTML += `
+            <div class="appointment-list-item">
+                <div class="date-badge">
+                    <div class="month">${mese}</div>
+                    <div class="day">${giorno}</div>
+                </div>
+                <div class="appointment-details">
+                    <div class="appointment-date"><i class="far fa-clock"></i> Ore ${app.ora}</div>
+                    <div class="appointment-professional">
+                        <i class="fas fa-user-injured"></i> ${app.paziente_nome} ${app.paziente_cognome}
+                    </div>
+                </div>
+            </div>
+        `;
       });
     });
 
-  // Promemoria
+  // 3. Promemoria
   fetch("/professionista/promemoria")
     .then(res => res.json())
     .then(data => {
@@ -52,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const weekAhead = new Date();
       weekAhead.setDate(today.getDate() + 7);
 
-      // Aggiunta dati demo per la presentazione
+      // Dati demo per la presentazione
       if (!data || data.length === 0) {
         data = [
           { data: "2025-06-05", ora_notifica: "09:00", nota: "Controllare referti paziente Rossi" },
@@ -66,12 +107,34 @@ document.addEventListener("DOMContentLoaded", () => {
         return promDate >= today && promDate <= weekAhead;
       }).slice(0, 3);
 
-      const list = document.getElementById("promemoriaList");
+      const listContainer = document.getElementById("promemoriaList");
+      listContainer.innerHTML = "";
+
+      if(filtered.length === 0) {
+          listContainer.innerHTML = `<p style="text-align:center; color: var(--subtext)">Nessun promemoria attivo.</p>`;
+          return;
+      }
+
       filtered.forEach(p => {
-        const li = document.createElement("li");
-        li.className = "card__list_item";
-        li.innerHTML = `<span>•</span> ${p.data} - ${p.ora_notifica}: ${p.nota}`;
-        list.appendChild(li);
+        const dataObj = new Date(p.data);
+        const mese = dataObj.toLocaleString('it-IT', { month: 'short' });
+        const giorno = String(dataObj.getDate()).padStart(2, '0');
+
+        // Card Promemoria con colori d'allerta (giallo/arancione)
+        listContainer.innerHTML += `
+            <div class="appointment-list-item warning">
+                <div class="date-badge warning-badge">
+                    <div class="month">${mese}</div>
+                    <div class="day">${giorno}</div>
+                </div>
+                <div class="appointment-details">
+                    <div class="appointment-date"><i class="fas fa-bell"></i> Ore ${p.ora_notifica}</div>
+                    <div class="appointment-professional">
+                        <i class="fas fa-sticky-note"></i> ${p.nota}
+                    </div>
+                </div>
+            </div>
+        `;
       });
     });
 });

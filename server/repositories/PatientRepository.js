@@ -33,8 +33,8 @@ class PatientRepository {
 	}
 
 	/**
-	 * Trova un paziente in base all'ID.
-	 * @param {number} id - ID del paziente.
+	 * Trova un paziente in base al User ID (dalla tabella User).
+	 * @param {number} id - User ID.
 	 * @returns {Promise<Patient|null>} L'oggetto Patient se trovato, altrimenti null.
 	 */
 	async findByUserId(id) {
@@ -58,6 +58,9 @@ class PatientRepository {
 		});
 	}
 
+	/**
+	 * Crea un nuovo paziente.
+	 */
 	async new(patient) {
 		const query = `INSERT INTO Paziente (user_id, nome, cognome, data_nascita, patologia)
 					   VALUES (?, ?, ?, ?, ?)`;
@@ -97,6 +100,9 @@ class PatientRepository {
 		});
 	}
 
+	/**
+	 * Restituisce il nome del professionista che ha in cura il paziente.
+	 */
 	async getNomeProfessionistaInCura(userId) {
 		const query = `SELECT p.nome, p.cognome
 					   FROM Paziente pa
@@ -113,6 +119,9 @@ class PatientRepository {
 		});
 	}
 
+	/**
+	 * Restituisce la data dell'ultima visita effettuata.
+	 */
 	async getUltimaVisita(userId) {
 		const query = `
 		SELECT a.data
@@ -134,6 +143,41 @@ class PatientRepository {
 				const formattedDate = `${day}-${month}-${year}`; // → '28/05/2025'
 
 				resolve(formattedDate);
+			});
+		});
+	}
+
+	/**
+	 * NOVITÀ: Cerca i pazienti in cura di un professionista specifico con filtri.
+	 * @param {number} professionistaId - L'ID del professionista (tabella Professionista)
+	 * @param {Object} filtri - Oggetto contenente le query di ricerca (es: { query: 'mario', eta: 10 })
+	 */
+	async searchPazientiInCura(professionistaId, filtri) {
+		let query = `
+			SELECT p.*
+			FROM Paziente p
+			JOIN InCura ic ON p.id = ic.paziente
+			WHERE ic.professionista = ? AND ic.data_fine IS NULL
+		`;
+		const params = [professionistaId];
+
+		// Filtro per nome o cognome (LIKE insensibile alle maiuscole in SQLite)
+		if (filtri.query) {
+			query += ` AND (p.nome LIKE ? OR p.cognome LIKE ?)`;
+			const searchPattern = `%${filtri.query}%`;
+			params.push(searchPattern, searchPattern);
+		}
+
+		// Filtro per età approssimativa in anni
+		if (filtri.eta) {
+			query += ` AND (CAST(strftime('%Y', 'now') AS INTEGER) - CAST(strftime('%Y', p.data_nascita) AS INTEGER)) = ?`;
+			params.push(filtri.eta);
+		}
+
+		return new Promise((resolve, reject) => {
+			db.all(query, params, (err, rows) => {
+				if (err) return reject(err);
+				resolve(rows || []);
 			});
 		});
 	}

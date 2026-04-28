@@ -45,7 +45,8 @@ class PatientController {
 
 	async getPatientDashboard(req, res) {
 		try {
-			const userId = req.user.id; // Supponendo che l'ID utente sia disponibile nel token
+			// N.B: ho uniformato req.user.id a req.session.userId basandomi sulla tua logica standard
+			const userId = req.session.userId || req.user?.id; 
 			const user = await UserRepository.findById(userId);
 			const patient = await PatientRepository.findByUserId(userId);
 			if (!user) {
@@ -91,6 +92,11 @@ class PatientController {
 		try {
 			const paziente = await PatientRepository.findByUserId(req.session.userId);
 			const relazione = await InCuraRepository.findActiveByPazienteId(paziente.id);
+			
+			if(!relazione) {
+				return res.json({ message: "Nessun professionista attualmente in cura." });
+			}
+
 			const professionista = await ProfessionistaRepository.findById(relazione.professionista);
 
 			res.json({
@@ -111,6 +117,37 @@ class PatientController {
 				returnUrl: '/paziente'
 			});
 			return res.redirect(`/error.html?${params.toString()}`);
+		}
+	}
+
+	/**
+	 * NOVITÀ: Endpoint per permettere al Professionista di cercare i suoi pazienti
+	 */
+	async searchPazienti(req, res) {
+		try {
+			// 1. Recuperiamo l'ID utente dalla sessione (del professionista loggato)
+			const userId = req.session.userId;
+
+			// 2. Troviamo il record 'Professionista' corrispondente a questo User
+			const professionista = await ProfessionistaRepository.findByUserId(userId);
+			if (!professionista) {
+				return res.status(403).json({ error: "Accesso negato: profilo professionista non trovato." });
+			}
+
+			// 3. Estraiamo i filtri di ricerca dalla query string dell'URL (?query=...&eta=...)
+			const filtri = {
+				query: req.query.query || null,
+				eta: req.query.eta ? parseInt(req.query.eta) : null
+			};
+
+			// 4. Interroghiamo il DB passando l'ID reale del professionista
+			const risultati = await PatientRepository.searchPazientiInCura(professionista.id, filtri);
+			
+			// 5. Restituiamo i risultati in formato JSON
+			res.status(200).json(risultati);
+		} catch (err) {
+			console.error('Errore durante la ricerca dei pazienti:', err);
+			res.status(500).json({ error: "Si è verificato un errore interno durante la ricerca dei pazienti." });
 		}
 	}
 }
