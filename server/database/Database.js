@@ -31,6 +31,7 @@ function initDb() {
                 behavior TEXT NOT NULL
             );
         `);
+		
 		// --- Entità Paziente
 		db.run(`
 			CREATE TABLE IF NOT EXISTS Paziente (
@@ -55,7 +56,6 @@ function initDb() {
 				specializzazione TEXT,
 				sede TEXT,
 				FOREIGN KEY(user_id) REFERENCES User(id) ON DELETE CASCADE
-
 			);
 		`);
 
@@ -88,7 +88,6 @@ function initDb() {
 			CREATE TABLE IF NOT EXISTS PostIt (
 				professionista INTEGER NOT NULL,
 				promemoria INTEGER NOT NULL,
-
 				PRIMARY KEY(professionista, promemoria),
 				FOREIGN KEY(professionista) REFERENCES Professionista(id) ON DELETE CASCADE,
 				FOREIGN KEY(promemoria) REFERENCES Promemoria(id) ON DELETE CASCADE
@@ -104,7 +103,6 @@ function initDb() {
 				data DATE NOT NULL,
 				ora TIME NOT NULL,
 				sede TEXT NOT NULL,
-
 				FOREIGN KEY(paziente) REFERENCES Paziente(id) ON DELETE CASCADE,
 				FOREIGN KEY(professionista) REFERENCES Professionista(id) ON DELETE CASCADE,
 				UNIQUE(paziente, professionista, data, ora)
@@ -121,7 +119,7 @@ function initDb() {
 			);
 		`);
 
-		// --- Relazione Assegnazione (Paziente - Professionista - Gioco) con attributi
+		// --- Relazione Assegnazione (MODIFICATA: Solo prescrizione)
 		db.run(`
 			CREATE TABLE IF NOT EXISTS Assegnazione (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -130,14 +128,25 @@ function initDb() {
 				gioco INTEGER NOT NULL,
 				scadenza DATE NOT NULL,
 				ripetizioni_assegnate INTEGER NOT NULL CHECK(ripetizioni_assegnate >= 1),
-				svolto INTEGER NOT NULL CHECK(svolto IN (0,1)),
-				ripetizioni_svolte INTEGER NOT NULL CHECK(ripetizioni_svolte >= 0),
-				punteggio INTEGER NOT NULL CHECK(punteggio >= 0),
-
+				
 				FOREIGN KEY(paziente) REFERENCES Paziente(id) ON DELETE CASCADE,
 				FOREIGN KEY(professionista) REFERENCES Professionista(id) ON DELETE CASCADE,
-				FOREIGN KEY(gioco) REFERENCES Gioco(id) ON DELETE CASCADE,
-				UNIQUE(paziente, professionista, gioco)
+				FOREIGN KEY(gioco) REFERENCES Gioco(id) ON DELETE CASCADE
+			);
+		`);
+
+		// --- NUOVA TABELLA: Svolgimento (Raccolta dati singola partita)
+		db.run(`
+			CREATE TABLE IF NOT EXISTS Svolgimento (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				assegnazione_id INTEGER NOT NULL,
+				data_ora DATETIME DEFAULT CURRENT_TIMESTAMP,
+				punteggio INTEGER,
+				punteggio_max INTEGER,
+				tempo_impiegato INTEGER,
+				dettagli_errori TEXT,
+				
+				FOREIGN KEY(assegnazione_id) REFERENCES Assegnazione(id) ON DELETE CASCADE
 			);
 		`);
 
@@ -150,13 +159,11 @@ function initDb() {
 				titolo TEXT,
 				note TEXT,
 				segnalazione INTEGER NOT NULL CHECK(segnalazione IN (0,1)),
-
 				FOREIGN KEY(paziente) REFERENCES Paziente(user_id) ON DELETE CASCADE
 			);
 		`);
 
 		console.log("Tabelle inizializzate o già esistenti.");
-
 	});
 }
 

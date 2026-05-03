@@ -9,6 +9,9 @@ const PatientRepository = require('../repositories/PatientRepository');
 const UserRepository = require('../repositories/UserRepository');
 const GameRepository = require('../repositories/GameRepository');
 
+// Importiamo il nuovo controller per la Fase 2
+const ProgressController = require('../controllers/ProgressController');
+
 router.get('/patient-info', async (req, res) => {
 	if (!req.session.userId) {
 		const params = new URLSearchParams({
@@ -17,7 +20,7 @@ router.get('/patient-info', async (req, res) => {
 			message: 'Si è verificato un errore: non sei loggato.',
 			returnUrl: '/login'
 		});
-		return res.redirect('/error.html?${params.toString()}');
+		return res.redirect(`/error.html?${params.toString()}`);
 	}
 
 	const nome = req.session.userName;
@@ -288,6 +291,30 @@ router.get('/esercizi', async (req, res) => {
 		console.error('Errore nel recupero degli esercizi:', err);
 		return res.status(500).json({ error: 'Errore interno del server' });
 	}
+});
+
+
+// ==========================================
+// FASE 2: GESTIONE PROGRESSI E GRAFICI
+// ==========================================
+
+// Rotta per salvare il risultato di una partita (chiamata dal Motore di Gioco)
+router.post('/giochi/salva-risultato', express.json(), async (req, res) => {
+	// Protezione middleware base in linea col resto del file
+	if (!req.session.userId) {
+		return res.status(401).json({ error: 'Utente non autenticato. Accesso negato.' });
+	}
+	// Delega la logica al nuovo ProgressController
+	return ProgressController.saveScore(req, res);
+});
+
+// Rotta per recuperare i dati dei grafici (chiamata dalla Dashboard Professionista)
+router.get('/pazienti/:id/progressi', async (req, res) => {
+	if (!req.session.userId) {
+		return res.status(401).json({ error: 'Utente non autenticato. Accesso negato.' });
+	}
+	// Delega la logica al nuovo ProgressController
+	return ProgressController.getChartData(req, res);
 });
 
 module.exports = router;

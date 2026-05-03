@@ -1,6 +1,10 @@
 -- SQLite, per aggiornare copia nel terminale: sqlite3 database.db < Query.sql
 
-Insert into Appuntamento values(5, 1, 1, "2025-04-15", "18:00:00", "Via del Tutto Eccezionale, 15");
+-- =======================
+-- APPUNTAMENTO (Test iniziale)
+-- =======================
+Insert into Appuntamento (paziente, professionista, data, ora, sede)
+values(5, 1, '2025-04-15', '18:00:00', 'Via del Tutto Eccezionale, 15');
 
 -- =======================
 -- UTENTI
@@ -41,14 +45,27 @@ INSERT INTO Appuntamento (paziente, professionista, data, ora, sede)
 VALUES (1, 1, '2025-06-10', '10:00:00', 'Via del Tutto Eccezionale, 15');
 
 -- =======================
--- GIOCO E ASSEGNAZIONE
+-- GIOCO E ASSEGNAZIONE (Aggiornata per la Fase 1)
 -- =======================
 
 INSERT INTO Gioco (nome, tipologia, note)
 VALUES ('Parole con la S', 'Fonologia', 'Esercizio per migliorare la pronuncia del fonema S');
 
-INSERT INTO Assegnazione (paziente, professionista, gioco, scadenza, ripetizioni_assegnate, svolto, ripetizioni_svolte, punteggio)
-VALUES (1, 1, 1, '2025-06-15', 5, 0, 0, 0);
+-- Inserimento nella tabella Assegnazione "snellita" (solo prescrizione)
+INSERT INTO Assegnazione (paziente, professionista, gioco, scadenza, ripetizioni_assegnate)
+VALUES (1, 1, 1, '2025-06-15', 5);
+
+-- =======================
+-- SVOLGIMENTO (Dati fittizi per i grafici)
+-- =======================
+
+-- Simulazione: il bambino gioca due volte il gioco assegnato.
+-- Nel campo 'dettagli_errori' usiamo il formato JSON.
+INSERT INTO Svolgimento (assegnazione_id, data_ora, punteggio, punteggio_max, tempo_impiegato, dettagli_errori)
+VALUES (1, '2025-05-20 15:30:00', 8, 10, 120, '["sole", "sale"]');
+
+INSERT INTO Svolgimento (assegnazione_id, data_ora, punteggio, punteggio_max, tempo_impiegato, dettagli_errori)
+VALUES (1, '2025-05-21 16:00:00', 9, 10, 105, '["sasso"]');
 
 -- =======================
 -- PROMEMORIA E POSTIT
@@ -78,8 +95,7 @@ SELECT * FROM InCura;
 SELECT * FROM Appuntamento;
 SELECT * FROM Gioco;
 SELECT * FROM Assegnazione;
+SELECT * FROM Svolgimento; -- Aggiunto test per la nuova tabella
 SELECT * FROM Promemoria;
 SELECT * FROM PostIt;
 SELECT * FROM Agenda;
-
-
