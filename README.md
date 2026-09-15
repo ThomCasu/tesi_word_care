@@ -1,5 +1,9 @@
 # 🌟 **WordCare** 🌟
 
+> Progetto nato come lavoro di gruppo universitario (La Sapienza) e sviluppato ulteriormente da
+> [Thomas Casu](https://github.com/ThomCasu) come base per la propria tesi di laurea in Ingegneria
+> Informatica. Repository originale del gruppo: https://github.com/mgiorg/WordCare
+
 ## 🧠 **Descrizione del Progetto**
 
 **WordCare** è una piattaforma innovativa progettata per supportare gli studi di logopedia, favorendo una stretta collaborazione tra pazienti e professionisti. L'obiettivo è fornire strumenti interattivi e personalizzati per migliorare le abilità linguistiche, monitorare i progressi e facilitare la comunicazione.
